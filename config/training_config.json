@@ -1,0 +1,12 @@
+{
+    "vocab_size": 50000,
+    "d_model": 512,
+    "nhead": 8,
+    "num_layers": 6,
+    "learning_rate": 5e-5,
+    "batch_size": 16,
+    "epochs": 10,
+    "warmup_steps": 1000,
+    "data_path": "data/processed/",
+    "model_save_path": "models/biblical_transformer.pt"
+}

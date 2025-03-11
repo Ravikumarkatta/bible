@@ -1,0 +1,6 @@
+{
+    "raw_data_path": "data/raw/",
+    "processed_data_path": "data/processed/",
+    "embeddings_path": "data/embeddings/",
+    "valid_translations": ["KJV", "NIV", "ESV"]
+}
