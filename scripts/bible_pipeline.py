@@ -38,17 +38,17 @@ class BiblePipeline:
         },
         "niv": {
             "name": "New International Version",
-            "url": "YOUR_NIV_SOURCE_URL",  # Replace with actual URL
+            "url": "https://www.ph4.org/_dl.php?back=bbl&a=Bible_English_NIRV&b=zefania&c",  # Replace with actual URL
             "format": "xml"
         },
         "nlt": {
             "name": "New Living Translation",
-            "url": "YOUR_NLT_SOURCE_URL",  # Replace with actual URL
+            "url": "https://www.ph4.org/_dl.php?back=bbl&a=Bible_English_NLT&b=zefania&c",  # Replace with actual URL
             "format": "xml"
         },
         "nkjv": {
             "name": "New King James Version",
-            "url": "YOUR_NKJV_SOURCE_URL",  # Replace with actual URL
+            "url": "Yhttps://www.ph4.org/_dl.php?back=bbl&a=Bible_English_NKJV&b=zefania&c",  # Replace with actual URL
             "format": "xml"
         }
     }
