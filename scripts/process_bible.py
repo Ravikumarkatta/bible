@@ -100,14 +100,16 @@ class BibleProcessor:
         return verses
     
     def _save_verses(self, verses: List[Dict]) -> None:
-        """Save processed verses to output file"""
+        """Save processed verses to output file."""
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        output_file = self.output_dir / "kjv.txt"
+        
+        # Get translation name from input filename
+        translation = self.input_file.stem.split('_')[0]
+        output_file = self.output_dir / f"{translation}.txt"
         
         with open(output_file, 'w', encoding='utf-8') as f:
             for verse in verses:
                 f.write(f"{verse['book']}|{verse['chapter']}|{verse['verse']}|{verse['text']}\n")
-        
         logger.info(f"Saved processed verses to {output_file}")
 
 def main():

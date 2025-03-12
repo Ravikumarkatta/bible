@@ -3,6 +3,7 @@ import requests
 import logging
 import json
 import zipfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, List
 from process_bible import BibleProcessor
@@ -23,8 +24,8 @@ class BiblePipeline:
         },
         "web": {
             "name": "World English Bible",
-            "url": "https://ebible.org/Scriptures/engwebp_usfx.zip",
-            "format": "xml"
+            "url": "https://ebible.org/Scriptures/engwebp_usfx.zip",  # Updated WEB URL
+            "format": "usfx"
         },
         "asv": {
             "name": "American Standard Version",
@@ -33,23 +34,13 @@ class BiblePipeline:
         },
         "douay": {
             "name": "Douay-Rheims Bible",
-            "url": "https://www.gutenberg.org/cache/epub/8300/pg8300.txt",
+            "url": "https://www.gutenberg.org/cache/epub/8300/pg8300.txt", 
             "format": "gutenberg"
         },
-        "niv": {
-            "name": "New International Version",
-            "url": "https://www.ph4.org/_dl.php?back=bbl&a=Bible_English_NIRV&b=zefania&c",  # Replace with actual URL
-            "format": "xml"
-        },
-        "nlt": {
-            "name": "New Living Translation",
-            "url": "https://www.ph4.org/_dl.php?back=bbl&a=Bible_English_NLT&b=zefania&c",  # Replace with actual URL
-            "format": "xml"
-        },
-        "nkjv": {
-            "name": "New King James Version",
-            "url": "Yhttps://www.ph4.org/_dl.php?back=bbl&a=Bible_English_NKJV&b=zefania&c",  # Replace with actual URL
-            "format": "xml"
+        "webster": {
+            "name": "Webster Bible",
+            "url": "https://www.gutenberg.org/cache/epub/8083/pg8083.txt",
+            "format": "gutenberg"
         }
     }
     
@@ -146,13 +137,10 @@ class BiblePipeline:
         is_zip = source['url'].endswith('.zip')
         
         if is_zip:
-            input_file = self.downloads_dir / translation_id / f"{translation_id}_bible.txt"
+            input_file = self.downloads_dir / translation_id / f"{translation_id}_bible.xml"
             if not input_file.exists():
-                # Try to find any suitable file in the extracted directory
                 extracted_dir = self.downloads_dir / translation_id
-                bible_files = []
-                for ext in ['.txt', '.xml']:
-                    bible_files.extend(extracted_dir.glob(f'**/*{ext}'))
+                bible_files = list(extracted_dir.glob('**/*.xml'))
                 if bible_files:
                     input_file = bible_files[0]
         else:
@@ -164,18 +152,83 @@ class BiblePipeline:
         
         try:
             logger.info(f"Processing {source['name']}...")
-            processor = BibleProcessor(
-                input_file=str(input_file),
-                output_dir=str(self.raw_dir),
-                format_type=source['format']
-            )
-            processor.process()
+            output_file = self.raw_dir / f"{translation_id}.txt"
+            
+            if source['format'] == 'xml':
+                self._process_xml_bible(input_file, output_file)
+            elif source['format'] == 'usfx':
+                self._process_usfx_bible(input_file, output_file)
+            else:
+                processor = BibleProcessor(
+                    input_file=str(input_file),
+                    output_dir=str(self.raw_dir),
+                    format_type=source['format']
+                )
+                processor.process()
             return True
             
         except Exception as e:
             logger.error(f"Failed to process {source['name']}: {str(e)}")
             return False
-    
+
+    def _process_xml_bible(self, input_file: Path, output_file: Path):
+        """Process XML format Bible files"""
+        try:
+            # First validate XML
+            with open(input_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+                if not content.strip().startswith('<?xml'):
+                    raise ValueError("File does not appear to be valid XML")
+            
+            tree = ET.parse(input_file)
+            root = tree.getroot()
+            
+            with open(output_file, 'w', encoding='utf-8') as f:
+                # Handle different XML formats
+                for book in root.findall('.//*[local-name()="book"]'):
+                    book_name = book.get('name', '')
+                    for chapter in book.findall('.//*[local-name()="chapter"]'):
+                        chapter_num = chapter.get('number', '')
+                        for verse in chapter.findall('.//*[local-name()="verse"]'):
+                            verse_num = verse.get('number', '')
+                            verse_text = (verse.text or '').strip()
+                            if book_name and chapter_num and verse_num and verse_text:
+                                f.write(f"{book_name}|{chapter_num}|{verse_num}|{verse_text}\n")
+            
+            logger.info(f"Processed XML Bible to {output_file}")
+            
+        except Exception as e:
+            raise Exception(f"XML processing failed: {str(e)}")
+
+    def _process_usfx_bible(self, input_file: Path, output_file: Path):
+        """Process USFX format Bible files"""
+        try:
+            tree = ET.parse(input_file)
+            root = tree.getroot()
+            
+            with open(output_file, 'w', encoding='utf-8') as f:
+                current_book = ""
+                current_chapter = ""
+                
+                for elem in root.iter():
+                    tag = elem.tag.lower()
+                    
+                    if tag == 'book':
+                        current_book = elem.get('id', '')
+                    elif tag == 'chapter':
+                        current_chapter = elem.get('number', '')
+                    elif tag == 'verse':
+                        verse_num = elem.get('number', '')
+                        verse_text = ''.join(elem.itertext()).strip()
+                        
+                        if current_book and current_chapter and verse_num and verse_text:
+                            f.write(f"{current_book}|{current_chapter}|{verse_num}|{verse_text}\n")
+            
+            logger.info(f"Processed USFX Bible to {output_file}")
+            
+        except Exception as e:
+            raise Exception(f"USFX processing failed: {str(e)}")
+
     def run_pipeline(self, translations: List[str] = None, force_download: bool = False):
         """Run full pipeline for specified translations"""
         if translations is None:
