@@ -4,7 +4,6 @@ from torch.utils.data import DataLoader
 import json
 import os
 import sys
-from transformers import get_linear_schedule_with_warmup
 
 # Use relative imports
 from ..model.architecture import BiblicalTransformer, BiblicalTransformerConfig
@@ -101,89 +100,51 @@ class Trainer:
             self.logger.error(f"Failed to initialize training components: {str(e)}")
             raise
 
-    def setup_training(self):
-        self.scheduler = get_linear_schedule_with_warmup(
-            self.optimizer,
-            num_warmup_steps=self.config.warmup_steps,
-            num_training_steps=len(self.train_loader) * self.config.epochs
-        )
-
     def train(self):
-        """Training loop with proper loss handling"""
-        self.model.train()
-        epoch_loss = 0
+        self.logger.info("Starting training...")
         best_val_loss = float('inf')
         
-        for batch_idx, batch in enumerate(self.train_loader):
-            # Unpack batch
-            input_ids, labels, attention_mask = batch
+        for epoch in range(self.config['training_params']['epochs']):
+            # Training phase
+            self.model.train()
+            train_loss = 0.0
+            for batch_idx, (input_ids, target_ids) in enumerate(self.train_loader):
+                input_ids, target_ids = input_ids.to(self.device), target_ids.to(self.device)
+                
+                self.optimizer.zero_grad()
+                outputs = self.model(input_ids)
+                loss = self.criterion(outputs, target_ids)
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+                self.optimizer.step()
+                self.scheduler.step()
+                
+                train_loss += loss.item()
+                if batch_idx % 100 == 0:
+                    self.logger.info(f"Epoch {epoch+1}, Batch {batch_idx}, Loss: {loss.item()}")
             
-            # Move to device
-            input_ids = input_ids.to(self.device)
-            labels = labels.to(self.device)
-            attention_mask = attention_mask.to(self.device)
+            avg_train_loss = train_loss / len(self.train_loader)
             
-            # Zero gradients
-            self.optimizer.zero_grad()
+            # Validation phase
+            val_loss = self.validate()
             
-            # Forward pass
-            outputs = self.model(
-                input_ids=input_ids,
-                attention_mask=attention_mask
-            )
+            self.logger.info(f"Epoch {epoch+1}: Train Loss = {avg_train_loss:.4f}, Val Loss = {val_loss:.4f}")
             
-            # Calculate loss
-            loss = self.criterion(outputs['logits'], labels)
-            
-            # Backward pass
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
-            self.optimizer.step()
-            self.scheduler.step()
-            
-            # Track loss
-            epoch_loss += loss.item()
-            if batch_idx % 100 == 0:
-                self.logger.info(f"Batch {batch_idx}, Loss: {loss.item():.4f}")
-        
-        avg_train_loss = epoch_loss / len(self.train_loader)
-        
-        # Validation phase
-        val_loss = self.validate()
-        
-        self.logger.info(f"Train Loss = {avg_train_loss:.4f}, Val Loss = {val_loss:.4f}")
-        
-        # Save best model
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            torch.save(self.model.state_dict(), 
-                      self.config['output_params']['model_save_path'])
-            self.logger.info(f"Saved best model with Val Loss: {best_val_loss:.4f}")
+            # Save best model
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                torch.save(self.model.state_dict(), self.config['output_params']['model_save_path'])
+                self.logger.info(f"Saved best model with Val Loss: {best_val_loss:.4f}")
 
     def validate(self):
-        """Validation loop with consistent output handling"""
         self.model.eval()
         val_loss = 0.0
-        
         with torch.no_grad():
-            for batch in self.val_loader:
-                input_ids, labels, attention_mask = batch
-                
-                # Move to device
-                input_ids = input_ids.to(self.device)
-                labels = labels.to(self.device)
-                attention_mask = attention_mask.to(self.device)
-                
-                # Forward pass
-                outputs = self.model(
-                    input_ids=input_ids,
-                    attention_mask=attention_mask
-                )
-                
-                # Calculate loss
-                loss = self.criterion(outputs['logits'], labels)
+            for input_ids, target_ids in self.val_loader:
+                input_ids, target_ids = input_ids.to(self.device), target_ids.to(self.device)
+                outputs = self.model(input_ids)
+                loss = self.criterion(outputs, target_ids)
                 val_loss += loss.item()
-                
         return val_loss / len(self.val_loader)
 
 if __name__ == "__main__":

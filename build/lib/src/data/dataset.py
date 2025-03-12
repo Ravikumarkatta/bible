@@ -2,7 +2,6 @@ import torch
 from torch.utils.data import Dataset
 from typing import Dict, List, Tuple, Optional, Union
 import logging
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -12,40 +11,49 @@ class BiblicalDataset(Dataset):
     def __init__(
         self,
         input_ids: torch.Tensor,
-        labels: torch.Tensor,
+        labels: Optional[torch.Tensor] = None,
         attention_mask: Optional[torch.Tensor] = None,
-        max_length: int = 512
+        verse_ids: Optional[torch.Tensor] = None,
+        theological_ids: Optional[torch.Tensor] = None
     ):
         """
-        Initialize dataset with input tensors.
+        Initialize dataset with required tensors.
         
         Args:
-            input_ids: Input tensor of shape [num_samples, seq_len]
-            labels: Target tensor of shape [num_samples, seq_len] 
-            attention_mask: Optional attention mask tensor
-            max_length: Maximum sequence length
+            input_ids: Token IDs of shape [num_samples, seq_len]
+            labels: Target token IDs of shape [num_samples, seq_len]
+            attention_mask: Attention mask of shape [num_samples, seq_len]
+            verse_ids: Bible verse reference IDs of shape [num_samples]
+            theological_ids: Theological concept IDs of shape [num_samples, num_concepts]
         """
-        if attention_mask is None:
-            attention_mask = torch.ones_like(input_ids)
-            
-        # Validate shapes
-        assert input_ids.size() == labels.size(), "Input and label tensors must have same size"
-        assert input_ids.size() == attention_mask.size(), "Input and attention mask tensors must have same size"
-        
         self.input_ids = input_ids
         self.labels = labels
         self.attention_mask = attention_mask
-        self.max_length = max_length
-        
+        self.verse_ids = verse_ids
+        self.theological_ids = theological_ids
+
     def __len__(self) -> int:
         return len(self.input_ids)
-    
-    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        return (
-            self.input_ids[idx][:self.max_length],
-            self.labels[idx][:self.max_length],
-            self.attention_mask[idx][:self.max_length]
-        )
+
+    def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
+        """Get a single sample from the dataset."""
+        item = {
+            "input_ids": self.input_ids[idx],
+        }
+        
+        if self.labels is not None:
+            item["labels"] = self.labels[idx]
+            
+        if self.attention_mask is not None:
+            item["attention_mask"] = self.attention_mask[idx]
+            
+        if self.verse_ids is not None:
+            item["verse_ids"] = self.verse_ids[idx]
+            
+        if self.theological_ids is not None:
+            item["theological_ids"] = self.theological_ids[idx]
+            
+        return item
 
 class BibleVerseDataset(BiblicalDataset):
     """Dataset specifically for Bible verses with reference tracking."""
@@ -153,23 +161,3 @@ class CommentaryDataset(BiblicalDataset):
             "source": entry.get("source", "unknown"),
             "reference": reference
         }
-
-# filepath: d:\biblical-ai\src\training\trainer.py
-def train(self):
-    """Training loop"""
-    self.model.train()
-    epoch_loss = 0
-    
-    for batch_idx, batch in enumerate(self.train_loader):
-        # Unpack batch safely
-        if not isinstance(batch, (tuple, list)) or len(batch) != 2:
-            raise ValueError(f"Expected batch to be tuple of (input_ids, target_ids), got {type(batch)}")
-            
-        input_ids, target_ids = batch
-        
-        # Move to device
-        input_ids = input_ids.to(self.device)
-        target_ids = target_ids.to(self.device)
-        
-        # Rest of training loop...
-        # ...existing code...

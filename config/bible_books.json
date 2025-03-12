@@ -1,0 +1,336 @@
+{
+    "aliases": {
+        "Genesis": {
+            "short": "Gen",
+            "long": "The Book of Genesis"
+        },
+        "Exodus": {
+            "short": "Ex",
+            "long": "The Book of Exodus"
+        },
+        "Leviticus": {
+            "short": "Lev",
+            "long": "The Book of Leviticus"
+        },
+        "Numbers": {
+            "short": "Num",
+            "long": "The Book of Numbers"
+        },
+        "Deuteronomy": {
+            "short": "Deut",
+            "long": "The Book of Deuteronomy"
+        },
+        "Joshua": {
+            "short": "Josh",
+            "long": "The Book of Joshua"
+        },
+        "Judges": {
+            "short": "Judg",
+            "long": "The Book of Judges"
+        },
+        "Ruth": {
+            "short": "Ruth",
+            "long": "The Book of Ruth"
+        },
+        "1 Samuel": {
+            "short": "1 Sam",
+            "long": "The First Book of Samuel"
+        },
+        "2 Samuel": {
+            "short": "2 Sam",
+            "long": "The Second Book of Samuel"
+        },
+        "1 Kings": {
+            "short": "1 Kgs",
+            "long": "The First Book of Kings"
+        },
+        "2 Kings": {
+            "short": "2 Kgs",
+            "long": "The Second Book of Kings"
+        },
+        "1 Chronicles": {
+            "short": "1 Chr",
+            "long": "The First Book of Chronicles"
+        },
+        "2 Chronicles": {
+            "short": "2 Chr",
+            "long": "The Second Book of Chronicles"
+        },
+        "Ezra": {
+            "short": "Ezra",
+            "long": "The Book of Ezra"
+        },
+        "Nehemiah": {
+            "short": "Neh",
+            "long": "The Book of Nehemiah"
+        },
+        "Esther": {
+            "short": "Est",
+            "long": "The Book of Esther"
+        },
+        "Job": {
+            "short": "Job",
+            "long": "The Book of Job"
+        },
+        "Psalms": {
+            "short": "Ps",
+            "long": "The Book of Psalms"
+        },
+        "Proverbs": {
+            "short": "Prov",
+            "long": "The Book of Proverbs"
+        },
+        "Ecclesiastes": {
+            "short": "Eccl",
+            "long": "The Book of Ecclesiastes"
+        },
+        "Song of Solomon": {
+            "short": "Song",
+            "long": "The Song of Solomon"
+        },
+        "Isaiah": {
+            "short": "Isa",
+            "long": "The Book of Isaiah"
+        },
+        "Jeremiah": {
+            "short": "Jer",
+            "long": "The Book of Jeremiah"
+        },
+        "Lamentations": {
+            "short": "Lam",
+            "long": "The Book of Lamentations"
+        },
+        "Ezekiel": {
+            "short": "Ezek",
+            "long": "The Book of Ezekiel"
+        },
+        "Daniel": {
+            "short": "Dan",
+            "long": "The Book of Daniel"
+        },
+        "Hosea": {
+            "short": "Hos",
+            "long": "The Book of Hosea"
+        },
+        "Joel": {
+            "short": "Joel",
+            "long": "The Book of Joel"
+        },
+        "Amos": {
+            "short": "Amos",
+            "long": "The Book of Amos"
+        },
+        "Obadiah": {
+            "short": "Obad",
+            "long": "The Book of Obadiah"
+        },
+        "Jonah": {
+            "short": "Jonah",
+            "long": "The Book of Jonah"
+        },
+        "Micah": {
+            "short": "Mic",
+            "long": "The Book of Micah"
+        },
+        "Nahum": {
+            "short": "Nah",
+            "long": "The Book of Nahum"
+        },
+        "Habakkuk": {
+            "short": "Hab",
+            "long": "The Book of Habakkuk"
+        },
+        "Zephaniah": {
+            "short": "Zeph",
+            "long": "The Book of Zephaniah"
+        },
+        "Haggai": {
+            "short": "Hag",
+            "long": "The Book of Haggai"
+        },
+        "Zechariah": {
+            "short": "Zech",
+            "long": "The Book of Zechariah"
+        },
+        "Malachi": {
+            "short": "Mal",
+            "long": "The Book of Malachi"
+        },
+        "Matthew": {
+            "short": "Matt",
+            "long": "The Gospel According to Matthew"
+        },
+        "Mark": {
+            "short": "Mark",
+            "long": "The Gospel According to Mark"
+        },
+        "Luke": {
+            "short": "Luke",
+            "long": "The Gospel According to Luke"
+        },
+        "John": {
+            "short": "John",
+            "long": "The Gospel According to John"
+        },
+        "Acts": {
+            "short": "Acts",
+            "long": "The Acts of the Apostles"
+        },
+        "Romans": {
+            "short": "Rom",
+            "long": "The Epistle to the Romans"
+        },
+        "1 Corinthians": {
+            "short": "1 Cor",
+            "long": "The First Epistle to the Corinthians"
+        },
+        "2 Corinthians": {
+            "short": "2 Cor",
+            "long": "The Second Epistle to the Corinthians"
+        },
+        "Galatians": {
+            "short": "Gal",
+            "long": "The Epistle to the Galatians"
+        },
+        "Ephesians": {
+            "short": "Eph",
+            "long": "The Epistle to the Ephesians"
+        },
+        "Philippians": {
+            "short": "Phil",
+            "long": "The Epistle to the Philippians"
+        },
+        "Colossians": {
+            "short": "Col",
+            "long": "The Epistle to the Colossians"
+        },
+        "1 Thessalonians": {
+            "short": "1 Thess",
+            "long": "The First Epistle to the Thessalonians"
+        },
+        "2 Thessalonians": {
+            "short": "2 Thess",
+            "long": "The Second Epistle to the Thessalonians"
+        },
+        "1 Timothy": {
+            "short": "1 Tim",
+            "long": "The First Epistle to Timothy"
+        },
+        "2 Timothy": {
+            "short": "2 Tim",
+            "long": "The Second Epistle to Timothy"
+        },
+        "Titus": {
+            "short": "Titus",
+            "long": "The Epistle to Titus"
+        },
+        "Philemon": {
+            "short": "Phlm",
+            "long": "The Epistle to Philemon"
+        },
+        "Hebrews": {
+            "short": "Heb",
+            "long": "The Epistle to the Hebrews"
+        },
+        "James": {
+            "short": "Jas",
+            "long": "The Epistle of James"
+        },
+        "1 Peter": {
+            "short": "1 Pet",
+            "long": "The First Epistle of Peter"
+        },
+        "2 Peter": {
+            "short": "2 Pet",
+            "long": "The Second Epistle of Peter"
+        },
+        "1 John": {
+            "short": "1 John",
+            "long": "The First Epistle of John"
+        },
+        "2 John": {
+            "short": "2 John",
+            "long": "The Second Epistle of John"
+        },
+        "3 John": {
+            "short": "3 John",
+            "long": "The Third Epistle of John"
+        },
+        "Jude": {
+            "short": "Jude",
+            "long": "The Epistle of Jude"
+        },
+        "Revelation": {
+            "short": "Rev",
+            "long": "The Book of Revelation"
+        }
+    },
+    "chapter_limits": {
+        "Genesis": 50,
+        "Exodus": 40,
+        "Leviticus": 27,
+        "Numbers": 36,
+        "Deuteronomy": 34,
+        "Joshua": 24,
+        "Judges": 21,
+        "Ruth": 4,
+        "1 Samuel": 31,
+        "2 Samuel": 24,
+        "1 Kings": 22,
+        "2 Kings": 25,
+        "1 Chronicles": 29,
+        "2 Chronicles": 36,
+        "Ezra": 10,
+        "Nehemiah": 13,
+        "Esther": 10,
+        "Job": 42,
+        "Psalms": 150,
+        "Proverbs": 31,
+        "Ecclesiastes": 12,
+        "Song of Solomon": 8,
+        "Isaiah": 66,
+        "Jeremiah": 52,
+        "Lamentations": 5,
+        "Ezekiel": 48,
+        "Daniel": 12,
+        "Hosea": 14,
+        "Joel": 3,
+        "Amos": 9,
+        "Obadiah": 1,
+        "Jonah": 4,
+        "Micah": 7,
+        "Nahum": 3,
+        "Habakkuk": 3,
+        "Zephaniah": 3,
+        "Haggai": 2,
+        "Zechariah": 14,
+        "Malachi": 4,
+        "Matthew": 28,
+        "Mark": 16,
+        "Luke": 24,
+        "John": 21,
+        "Acts": 28,
+        "Romans": 16,
+        "1 Corinthians": 16,
+        "2 Corinthians": 13,
+        "Galatians": 6,
+        "Ephesians": 6,
+        "Philippians": 4,
+        "Colossians": 4,
+        "1 Thessalonians": 5,
+        "2 Thessalonians": 3,
+        "1 Timothy": 6,
+        "2 Timothy": 4,
+        "Titus": 3,
+        "Philemon": 1,
+        "Hebrews": 13,
+        "James": 5,
+        "1 Peter": 5,
+        "2 Peter": 3,
+        "1 John": 5,
+        "2 John": 1,
+        "3 John": 1,
+        "Jude": 1,
+        "Revelation": 22
+    }
+}

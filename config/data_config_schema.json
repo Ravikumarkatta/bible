@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "properties": {
+    "raw_data_path": {
+      "type": "string"
+    },
+    "processed_data_path": {
+      "type": "string"
+    },
+    "embeddings_path": {
+      "type": "string"
+    },
+    "valid_translations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "raw_data_path",
+    "processed_data_path",
+    "embeddings_path",
+    "valid_translations"
+  ]
+}

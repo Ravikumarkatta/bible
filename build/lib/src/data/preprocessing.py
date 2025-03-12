@@ -55,7 +55,7 @@ class BiblePreprocessor:
         pass  
       
     def clean_text(self, text: str) -> str:  
-        """Clean and normalize Bible text."""  
+        """Clean and normalize Bible text."""
         return clean_text(text)
       
     def parse_verse_references(self, text: str) -> List[Dict[str, Union[str, int]]]:  
@@ -229,61 +229,42 @@ class BiblePreprocessor:
 class BiblicalDataset(Dataset):
     """Dataset class for biblical text data."""
     
-    def __init__(self, input_ids: torch.Tensor, labels: torch.Tensor, attention_mask: torch.Tensor):
+    def __init__(self, input_data: torch.Tensor, target_data: torch.Tensor):
         """
-        Initialize dataset with input tensors.
+        Initialize dataset with input and target tensors.
         
         Args:
-            input_ids: Input tensor of shape [num_samples, seq_len]
-            labels: Target tensor of shape [num_samples, seq_len]
-            attention_mask: Attention mask tensor of shape [num_samples, seq_len]
+            input_data: Input tensor of shape [num_samples, seq_len]
+            target_data: Target tensor of shape [num_samples, seq_len]
         """
-        assert input_ids.size() == labels.size(), "Input and label tensors must have same size"
-        assert input_ids.size() == attention_mask.size(), "Input and attention mask tensors must have same size"
-        
-        self.input_ids = input_ids
-        self.labels = labels
-        self.attention_mask = attention_mask
+        assert input_data.size() == target_data.size(), "Input and target tensors must have same size"
+        self.input_data = input_data
+        self.target_data = target_data
     
     def __len__(self) -> int:
-        return len(self.input_ids)
+        return len(self.input_data)
     
-    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        return self.input_ids[idx], self.labels[idx], self.attention_mask[idx]
+    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        return self.input_data[idx], self.target_data[idx]
 
-import torch
-from pathlib import Path
-from typing import Tuple
-from .dataset import BiblicalDataset
-
-def load_processed_data(
-    data_path: str,
-    val_split: float = 0.1
-) -> Tuple[BiblicalDataset, BiblicalDataset]:
-    """Load processed data and split into train/val datasets."""
+def load_processed_data(data_path: str):
+    """Load preprocessed training and validation data."""
+    from pathlib import Path
+    import torch
+    from .dataset import BiblicalDataset
+    
     data_dir = Path(data_path)
-    if not data_dir.exists():
-        raise FileNotFoundError(f"Data directory not found: {data_dir}")
-        
-    try:
-        # Load data files
-        train_data = torch.load(data_dir / "train.pt")
-        val_data = torch.load(data_dir / "val.pt")
-        
-        # Create datasets
-        train_dataset = BiblicalDataset(
-            input_ids=train_data['input_ids'],
-            labels=train_data['labels'],
-            attention_mask=train_data['attention_mask']
-        )
-        
-        val_dataset = BiblicalDataset(
-            input_ids=val_data['input_ids'],
-            labels=val_data['labels'], 
-            attention_mask=val_data['attention_mask']
-        )
-        
-        return train_dataset, val_dataset
-        
-    except Exception as e:
-        raise RuntimeError(f"Failed to load data from {data_dir}: {str(e)}")
+    
+    train_data = BiblicalDataset(
+        input_ids=torch.load(data_dir / "train_inputs.pt"),
+        labels=torch.load(data_dir / "train_labels.pt"),
+        attention_mask=torch.load(data_dir / "train_attention.pt")
+    )
+    
+    val_data = BiblicalDataset(
+        input_ids=torch.load(data_dir / "val_inputs.pt"),
+        labels=torch.load(data_dir / "val_labels.pt"),
+        attention_mask=torch.load(data_dir / "val_attention.pt")
+    )
+    
+    return train_data, val_data
