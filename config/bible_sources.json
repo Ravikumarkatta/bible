@@ -1,0 +1,22 @@
+{
+    "translations": [
+        {
+            "id": "kjv",
+            "name": "King James Version",
+            "url": "https://www.gutenberg.org/files/10/10-0.txt",
+            "format": "gutenberg"
+        },
+        {
+            "id": "web",
+            "name": "World English Bible",
+            "url": "https://ebible.org/Texts/eng-web_readaloud.zip",
+            "format": "ebible"
+        },
+        {
+            "id": "asv",
+            "name": "American Standard Version",
+            "url": "https://www.gutenberg.org/files/8042/8042-0.txt",
+            "format": "gutenberg"
+        }
+    ]
+}
