@@ -39,6 +39,9 @@ class Trainer:
         with open(config_path, 'r') as f:
             self.config = json.load(f)
         
+        # Initialize early stopping counter
+        self.early_stopping_counter = 0
+        
         # Create model config from model_params
         # Note: This needs to be updated based on how model_params is structured in your config
         # Assuming model_params is a top-level key in your config
@@ -62,7 +65,7 @@ class Trainer:
         """Initialize model with error handling."""
         try:
             self.model = BiblicalTransformer(self.model_config).to(self.device)
-            self.logger.info("Model initialized successfully")
+            self.logger.info(f"Model initialized successfully on {self.device}")
         except Exception as e:
             self.logger.error(f"Failed to initialize model: {str(e)}")
             raise
@@ -77,7 +80,7 @@ class Trainer:
                 os.path.join(PROJECT_ROOT, data_path)
             )
             
-            # Get batch size from config
+            # Get batch size from config - CORRECTED
             batch_size = self.config['training']['batch_size']
             
             self.train_loader = DataLoader(
@@ -98,15 +101,19 @@ class Trainer:
     def setup_training_components(self):
         """Initialize loss, optimizer and scheduler with config params."""
         try:
+            # Initialize loss function based on config
+            loss_config = self.config.get('loss', {})
+            main_loss_type = loss_config.get('main_loss', 'cross_entropy')
+            self.logger.info(f"Using {main_loss_type} as main loss function")
             self.criterion = TheologicalLoss()
             
-            # Get learning rate from config - proper path according to the JSON structure
+            # Get learning rate from config - proper dictionary access
             lr = self.config['optimizer']['learning_rate']
             
-            # Get warmup steps from config
+            # Get warmup steps from config - CORRECTED
             warmup_steps = self.config['training']['warmup']['warmup_steps']
             
-            # Get total epochs from config
+            # Get total epochs from config - CORRECTED
             epochs = self.config['training']['max_epochs']
             
             # Calculate total steps
@@ -119,18 +126,31 @@ class Trainer:
                 warmup_steps=warmup_steps,
                 total_steps=total_steps
             )
-            self.logger.info("Training components initialized successfully")
+            self.logger.info(f"Initialized optimizer with learning rate {lr} and {warmup_steps} warmup steps")
+        except KeyError as e:
+            self.logger.error(f"Missing configuration key: {str(e)}")
+            raise
         except Exception as e:
             self.logger.error(f"Failed to initialize training components: {str(e)}")
             raise
 
     def train(self):
         """Training loop with proper loss handling"""
+        # CORRECTED - proper dictionary access for max_epochs
         max_epochs = self.config['training']['max_epochs']
         best_val_loss = float('inf')
         
         # Get max gradient norm from config
         max_grad_norm = self.config['training']['max_grad_norm']
+        
+        # Check if we're using gradient accumulation
+        accumulation_steps = self.config['training']['accumulation_steps']
+        
+        # Check if we're using mixed precision
+        use_mixed_precision = self.config['training']['mixed_precision']
+        scaler = torch.cuda.amp.GradScaler() if use_mixed_precision else None
+        
+        self.logger.info(f"Starting training for {max_epochs} epochs")
         
         for epoch in range(max_epochs):
             self.logger.info(f"Starting epoch {epoch+1}/{max_epochs}")
@@ -146,32 +166,80 @@ class Trainer:
                 labels = labels.to(self.device)
                 attention_mask = attention_mask.to(self.device)
                 
-                # Zero gradients
-                self.optimizer.zero_grad()
+                # Zero gradients only at the beginning of accumulation steps
+                if batch_idx % accumulation_steps == 0:
+                    self.optimizer.zero_grad()
                 
-                # Forward pass
-                outputs = self.model(
-                    input_ids=input_ids,
-                    attention_mask=attention_mask
-                )
+                # Mixed precision training if enabled
+                if use_mixed_precision:
+                    with torch.cuda.amp.autocast():
+                        # Forward pass
+                        outputs = self.model(
+                            input_ids=input_ids,
+                            attention_mask=attention_mask
+                        )
+                        
+                        # Calculate loss
+                        loss = self.criterion(outputs['logits'], labels)
+                        loss = loss / accumulation_steps  # Normalize loss for accumulation
+                    
+                    # Backward pass with scaler
+                    scaler.scale(loss).backward()
+                    
+                    if (batch_idx + 1) % accumulation_steps == 0:
+                        # Clip gradients
+                        scaler.unscale_(self.optimizer)
+                        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=max_grad_norm)
+                        
+                        # Update weights
+                        scaler.step(self.optimizer)
+                        scaler.update()
+                        self.scheduler.step()
+                else:
+                    # Forward pass
+                    outputs = self.model(
+                        input_ids=input_ids,
+                        attention_mask=attention_mask
+                    )
+                    
+                    # Calculate loss
+                    loss = self.criterion(outputs['logits'], labels)
+                    loss = loss / accumulation_steps  # Normalize loss for accumulation
+                    
+                    # Backward pass
+                    loss.backward()
+                    
+                    if (batch_idx + 1) % accumulation_steps == 0:
+                        # Clip gradients
+                        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=max_grad_norm)
+                        
+                        # Update weights
+                        self.optimizer.step()
+                        self.scheduler.step()
                 
-                # Calculate loss
-                loss = self.criterion(outputs['logits'], labels)
-                
-                # Backward pass
-                loss.backward()
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=max_grad_norm)
-                self.optimizer.step()
-                self.scheduler.step()
-                
-                # Track loss
-                epoch_loss += loss.item()
+                # Track loss (use the non-normalized value for logging)
+                epoch_loss += loss.item() * accumulation_steps
                 
                 # Get logging frequency from config
                 log_every_n_steps = self.config['logging']['log_every_n_steps']
                 
                 if batch_idx % log_every_n_steps == 0:
-                    self.logger.info(f"Epoch {epoch+1}/{max_epochs}, Batch {batch_idx}, Loss: {loss.item():.4f}")
+                    self.logger.info(f"Epoch {epoch+1}/{max_epochs}, Batch {batch_idx}, Loss: {loss.item() * accumulation_steps:.4f}")
+                
+                # Check if we should save checkpoint based on steps
+                save_every_n_steps = self.config['training']['checkpoint']['save_every_n_steps']
+                if batch_idx > 0 and batch_idx % save_every_n_steps == 0:
+                    checkpoint_dir = self.config.get('model', {}).get('checkpoint_dir', 'models/checkpoints')
+                    os.makedirs(checkpoint_dir, exist_ok=True)
+                    checkpoint_path = os.path.join(checkpoint_dir, f"checkpoint_epoch{epoch+1}_step{batch_idx}.pt")
+                    torch.save({
+                        'epoch': epoch,
+                        'step': batch_idx,
+                        'model_state_dict': self.model.state_dict(),
+                        'optimizer_state_dict': self.optimizer.state_dict(),
+                        'scheduler_state_dict': self.scheduler.state_dict(),
+                    }, checkpoint_path)
+                    self.logger.info(f"Saved checkpoint at epoch {epoch+1}, step {batch_idx}")
             
             avg_train_loss = epoch_loss / len(self.train_loader)
             
@@ -234,5 +302,12 @@ class Trainer:
         return val_loss / len(self.val_loader)
 
 if __name__ == "__main__":
-    trainer = Trainer("config/training_config.json")
+    # Handle command line arguments for config path
+    import argparse
+    parser = argparse.ArgumentParser(description="Train a BiblicalTransformer model")
+    parser.add_argument("--config", type=str, default="config/training_config.json", help="Path to configuration file")
+    args = parser.parse_args()
+    
+    # Initialize and run trainer
+    trainer = Trainer(args.config)
     trainer.train()
