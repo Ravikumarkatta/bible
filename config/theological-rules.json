@@ -1,0 +1,169 @@
+{
+  "doctrinal_standards": {
+    "primary_sources": [
+      "Scripture",
+      "Apostles' Creed",
+      "Nicene Creed",
+      "Westminster Confession"
+    ],
+    "authority_hierarchy": [
+      "direct_scripture",
+      "clear_biblical_inference",
+      "historical_creedal_consensus",
+      "theological_tradition",
+      "commentary",
+      "modern_interpretation"
+    ]
+  },
+  "verification_rules": {
+    "scripture_consistency": {
+      "enabled": true,
+      "multi_verse_validation": true,
+      "contextual_analysis": true,
+      "cross_reference_checking": true,
+      "minimum_verses_required": 2,
+      "error_threshold": 0.05
+    },
+    "historical_orthodoxy": {
+      "enabled": true,
+      "creedal_alignment": true,
+      "historical_consensus_check": true,
+      "denomination_sensitivity": true,
+      "error_threshold": 0.1
+    },
+    "logical_consistency": {
+      "enabled": true,
+      "contradiction_detection": true,
+      "syllogistic_validation": true,
+      "error_threshold": 0.05
+    },
+    "hermeneutic_principles": {
+      "context_preservation": true,
+      "genre_awareness": true,
+      "historical_setting_consideration": true,
+      "original_language_fidelity": true,
+      "authorial_intent_focus": true,
+      "canonical_consistency": true,
+      "error_threshold": 0.1
+    }
+  },
+  "core_doctrines": [
+    {
+      "name": "Trinity",
+      "description": "God eternally exists as three persons, Father, Son, and Holy Spirit, each fully God, yet one God",
+      "key_verses": ["Matthew 28:19", "2 Corinthians 13:14", "John 1:1-14"],
+      "check_level": "strict",
+      "error_tolerance": 0.01
+    },
+    {
+      "name": "Incarnation",
+      "description": "Jesus Christ is fully God and fully man in one person",
+      "key_verses": ["John 1:14", "Colossians 2:9", "Hebrews 2:14-18"],
+      "check_level": "strict",
+      "error_tolerance": 0.01
+    },
+    {
+      "name": "Salvation by Grace",
+      "description": "Salvation is by grace alone through faith alone in Christ alone",
+      "key_verses": ["Ephesians 2:8-9", "Romans 3:21-26", "Galatians 2:16"],
+      "check_level": "strict",
+      "error_tolerance": 0.01
+    },
+    {
+      "name": "Scripture Authority",
+      "description": "Scripture is the inspired, inerrant, and authoritative Word of God",
+      "key_verses": ["2 Timothy 3:16-17", "2 Peter 1:20-21", "Psalm 119:160"],
+      "check_level": "strict",
+      "error_tolerance": 0.01
+    },
+    {
+      "name": "Resurrection",
+      "description": "Jesus Christ was bodily resurrected from the dead",
+      "key_verses": ["1 Corinthians 15:3-8", "Luke 24:36-43", "Acts 1:3"],
+      "check_level": "strict",
+      "error_tolerance": 0.01
+    }
+  ],
+  "denominational_variations": {
+    "enabled": true,
+    "definitions": [
+      {
+        "name": "Reformed",
+        "distinctive_doctrines": ["predestination", "covenant_theology", "sola_scriptura"],
+        "key_sources": ["Westminster Confession", "Heidelberg Catechism"]
+      },
+      {
+        "name": "Baptist",
+        "distinctive_doctrines": ["believers_baptism", "congregational_governance", "soul_liberty"],
+        "key_sources": ["Baptist Confession 1689", "Baptist Faith and Message"]
+      },
+      {
+        "name": "Lutheran",
+        "distinctive_doctrines": ["consubstantiation", "law_gospel_distinction", "simul_justus_et_peccator"],
+        "key_sources": ["Augsburg Confession", "Book of Concord"]
+      },
+      {
+        "name": "Methodist",
+        "distinctive_doctrines": ["prevenient_grace", "sanctification", "arminianism"],
+        "key_sources": ["Twenty-Five Articles", "Wesley's Sermons"]
+      },
+      {
+        "name": "Catholic",
+        "distinctive_doctrines": ["papal_authority", "transubstantiation", "sacred_tradition"],
+        "key_sources": ["Catechism of Catholic Church", "Council of Trent"]
+      }
+    ],
+    "response_policy": "indicate_variations"
+  },
+  "controversial_topics": {
+    "eschatology": {
+      "variations": ["premillennialism", "amillennialism", "postmillennialism"],
+      "handling": "present_major_views"
+    },
+    "baptism": {
+      "variations": ["infant_baptism", "believers_baptism"],
+      "handling": "present_major_views"
+    },
+    "predestination": {
+      "variations": ["calvinist", "arminian", "molinism"],
+      "handling": "present_major_views"
+    },
+    "spiritual_gifts": {
+      "variations": ["cessationist", "continuationist"],
+      "handling": "present_major_views"
+    },
+    "church_governance": {
+      "variations": ["episcopal", "presbyterian", "congregational"],
+      "handling": "present_major_views"
+    }
+  },
+  "error_handling": {
+    "low_confidence_threshold": 0.7,
+    "uncertain_response_policy": "indicate_uncertainty",
+    "contradictory_evidence_policy": "present_alternatives",
+    "missing_evidence_policy": "abstain",
+    "fallback_statement": "This question involves complex theological matters where faithful Christians hold different views. I'll present the major perspectives while recognizing the primacy of Scripture."
+  },
+  "theological_language": {
+    "technical_term_definitions": "data/raw/theological/technical_terms.json",
+    "use_traditional_terminology": true,
+    "explain_technical_terms": true,
+    "language_level_adaptation": true
+  },
+  "pastoral_sensitivity": {
+    "comfort_passages": {
+      "grief": ["Psalm 23", "John 14:1-6", "1 Thessalonians 4:13-18"],
+      "anxiety": ["Philippians 4:6-7", "1 Peter 5:7", "Matthew 6:25-34"],
+      "doubt": ["Mark 9:24", "Jude 1:22", "John 20:24-29"]
+    },
+    "sensitive_topics": [
+      "suicide",
+      "abuse",
+      "suffering",
+      "doubt",
+      "church_hurt"
+    ],
+    "pastoral_approach": true,
+    "recognize_emotional_context": true
+  }
+}
