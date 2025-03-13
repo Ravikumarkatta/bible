@@ -1,68 +1,105 @@
-biblical-ai/  
-├── config/                  # Configuration files  
-│   ├── model_config.json    # Model architecture configuration  
-│   ├── training_config.json # Training hyperparameters  
-│   └── data_config.json     # Data processing configuration  
-│  
-├── data/                    # Data storage  
-│   ├── raw/                 # Raw Bible texts, commentaries  
-│   │   ├── bibles/          # Different Bible translations  
-│   │   ├── commentaries/    # Biblical commentaries  
-│   │   └── qa_pairs/        # Question-answer pairs  
-│   ├── processed/           # Processed datasets  
-│   └── embeddings/          # Pre-computed embeddings  
-│  
-├── src/                     # Source code  
-│   ├── data/                # Data processing modules  
-│   │   ├── __init__.py  
-│   │   ├── preprocessing.py # Text cleaning and normalization  
-│   │   ├── tokenization.py  # Custom tokenizer for biblical content  
-│   │   ├── augmentation.py  # Data augmentation techniques  
-│   │   └── dataset.py       # Dataset creation and management  
-│   │  
-│   ├── model/               # Model architecture  
-│   │   ├── __init__.py  
-│   │   ├── architecture.py  # Model definition  
-│   │   ├── attention.py     # Custom attention mechanisms  
-│   │   ├── embeddings.py    # Token and positional embeddings  
-│   │   └── verse_detector.py# Bible verse reference detection  
-│   │  
-│   ├── training/            # Training components  
-│   │   ├── __init__.py  
-│   │   ├── trainer.py       # Training loop and logic  
-│   │   ├── loss.py          # Custom loss functions  
-│   │   ├── optimization.py  # Optimizers and schedulers  
-│   │   └── evaluation.py    # Evaluation metrics  
-│   │  
-│   ├── utils/               # Utility functions  
-│   │   ├── __init__.py  
-│   │   ├── logger.py        # Logging functionality  
-│   │   ├── verse_utils.py   # Bible verse utilities  
-│   │   └── theological_checks.py # Theological accuracy verification  
-│   │  
-│   └── serve/               # Serving and deployment  
-│       ├── __init__.py  
-│       ├── api.py           # FastAPI endpoints  
-│       ├── middleware.py    # Request/response middleware  
-│       └── verse_resolver.py# Bible verse resolution service  
-│  
-├── scripts/                 # Utility scripts  
-│   ├── download_bibles.py   # Script to download Bible translations  
-│   ├── generate_dataset.py  # Generate training datasets  
-│   └── evaluate_model.py    # Run evaluation suite  
-│  
-├── tests/                   # Test suite  
-│   ├── __init__.py  
-│   ├── test_data.py         # Data processing tests  
-│   ├── test_model.py        # Model architecture tests  
-│   └── test_theological.py  # Theological accuracy tests  
-│  
-├── notebooks/               # Jupyter notebooks for exploration  
-│   ├── data_exploration.ipynb  
-│   ├── model_analysis.ipynb  
-│   └── error_analysis.ipynb  
-│  
-├── .env.example             # Environment variables template  
-├── requirements.txt         # Project dependencies  
-├── setup.py                 # Package installation  
+bible-ai/
+├── config/                  # Configuration files
+│   ├── model_config.json    # Model architecture configuration
+│   ├── training_config.json # Training hyperparameters
+│   ├── data_config.json     # Data processing configuration
+│   └── frontend_config.json # Frontend configuration
+│
+├── data/                    # Data storage
+│   ├── raw/                 # Raw Bible texts, commentaries
+│   │   ├── bibles/          # Different Bible translations
+│   │   ├── commentaries/    # Biblical commentaries
+│   │   └── qa_pairs/        # Question-answer pairs
+│   ├── processed/           # Processed datasets
+│   └── embeddings/          # Pre-computed embeddings
+│
+├── src/                     # Source code
+│   ├── data/                # Data processing modules
+│   │   ├── init.py
+│   │   ├── preprocessing.py # Text cleaning and normalization
+│   │   ├── tokenization.py  # Custom tokenizer for biblical content
+│   │   ├── augmentation.py  # Data augmentation techniques
+│   │   └── dataset.py       # Dataset creation and management
+│   │
+│   ├── model/               # Model architecture
+│   │   ├── init.py
+│   │   ├── architecture.py  # Model definition
+│   │   ├── attention.py     # Custom attention mechanisms
+│   │   ├── embeddings.py    # Token and positional embeddings
+│   │   └── verse_detector.py# Bible verse reference detection
+│   │
+│   ├── training/            # Training components
+│   │   ├── init.py
+│   │   ├── trainer.py       # Training loop and logic
+│   │   ├── loss.py          # Custom loss functions
+│   │   ├── optimization.py  # Optimizers and schedulers
+│   │   └── evaluation.py    # Evaluation metrics
+│   │
+│   ├── utils/               # Utility functions
+│   │   ├── init.py
+│   │   ├── logger.py        # Logging functionality
+│   │   ├── verse_utils.py   # Bible verse utilities
+│   │   └── theological_checks.py # Theological accuracy verification
+│   │
+│   └── serve/               # Serving and deployment
+│       ├── init.py
+│       ├── api.py           # FastAPI endpoints
+│       ├── middleware.py    # Request/response middleware
+│       └── verse_resolver.py# Bible verse resolution service
+│
+├── frontend/                # Frontend application
+│   ├── public/              # Static files
+│   │   ├── index.html       # Main HTML file
+│   │   ├── favicon.ico      # Site favicon
+│   │   └── assets/          # Images, fonts, etc.
+│   │
+│   ├── src/                 # Frontend source code
+│   │   ├── components/      # React components
+│   │   │   ├── common/      # Shared components
+│   │   │   ├── layout/      # Layout components
+│   │   │   ├── search/      # Search functionality
+│   │   │   ├── bible/       # Bible text display
+│   │   │   ├── commentary/  # Commentary components
+│   │   │   └── chat/        # AI chat interface
+│   │   │
+│   │   ├── context/         # React context providers
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── services/        # API services
+│   │   ├── utils/           # Utility functions
+│   │   ├── styles/          # CSS/SCSS files
+│   │   ├── pages/           # Page components
+│   │   ├── routes/          # Routing configuration
+│   │   ├── App.js           # Main application component
+│   │   └── index.js         # Application entry point
+│   │
+│   ├── tests/               # Frontend tests
+│   │   ├── unit/            # Unit tests
+│   │   ├── integration/     # Integration tests
+│   │   └── e2e/             # End-to-end tests
+│   │
+│   ├── package.json         # Frontend dependencies
+│   ├── webpack.config.js    # Webpack configuration
+│   └── .env                 # Frontend environment variables
+│
+├── scripts/                 # Utility scripts
+│   ├── download_bibles.py   # Script to download Bible translations
+│   ├── generate_dataset.py  # Generate training datasets
+│   └── evaluate_model.py    # Run evaluation suite
+│
+├── tests/                   # Backend test suite
+│   ├── init.py
+│   ├── test_data.py         # Data processing tests
+│   ├── test_model.py        # Model architecture tests
+│   └── test_theological.py  # Theological accuracy tests
+│
+├── notebooks/               # Jupyter notebooks for exploration
+│   ├── data_exploration.ipynb
+│   ├── model_analysis.ipynb
+│   └── error_analysis.ipynb
+│
+├── .env.example             # Environment variables template
+├── requirements.txt         # Backend dependencies
+├── setup.py                 # Package installation
+├── docker-compose.yml       # Docker composition for services
+├── Dockerfile               # Docker build configuration
 └── README.md                # Project documentation
