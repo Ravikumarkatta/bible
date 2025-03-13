@@ -29,11 +29,12 @@ class BiblicalTextPreprocessor:
         # Compile common cleanup patterns
         self.cleanup_patterns = [
             (re.compile(r'\s+'), ' '),                       # Standardize whitespace
-            (re.compile(r'["""]'), '"'),                     # Standardize quotes
-            (re.compile(r'[''']'), "'"),                     # Standardize apostrophes
+            (re.compile(r'["“”]'), '"'),                     # Standardize quotes
+            (re.compile(r"[‘’']"), "'"),                     # Standardize apostrophes
             (re.compile(r'†|‡|\*|\#|¶'), ''),                # Remove footnote markers
             (re.compile(r'\[.*?\]'), ''),                    # Remove square bracket content
         ]
+        
         
         # Regex for verse detection
         self.verse_pattern = re.compile(r'(\d+)[:\.](\d+)')
@@ -452,26 +453,217 @@ class BiblicalTextPreprocessor:
         
         return df
 
+# ===================== Added Code: Training Data Pipeline =====================
+# The following code integrates tokenizer-based data preparation for training.
+# It provides a dataset class for instruction fine-tuning and a helper to create DataLoaders.
+
+import torch
+from torch.utils.data import Dataset, DataLoader
+from transformers import PreTrainedTokenizer
+from typing import Dict, List, Tuple
+
+class BibleInstructionDataset(Dataset):
+    """Dataset for instruction fine-tuning with biblical data."""
+    
+    def __init__(self, data_path: str, tokenizer: PreTrainedTokenizer, max_length: int = 512):
+        """
+        Initialize dataset from instruction data.
+        
+        Args:
+            data_path: Path to instruction JSON file.
+            tokenizer: HuggingFace tokenizer to use.
+            max_length: Maximum sequence length.
+        """
+        self.data = self._load_data(data_path)
+        self.tokenizer = tokenizer
+        self.max_length = max_length
+        logger.info(f"Loaded {len(self.data)} instruction examples")
+        
+    def _load_data(self, data_path: str) -> List[Dict]:
+        """Load instruction data from JSON file."""
+        with open(data_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return data
+    
+    def __len__(self) -> int:
+        return len(self.data)
+    
+    def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
+        """Get tokenized instruction example."""
+        item = self.data[idx]
+        
+        # Format as instruction prompt
+        instruction = item['instruction']
+        input_text = item['input']
+        output = item['output']
+        
+        # Format prompt according to instruction tuning format
+        prompt = f"Instruction: {instruction}\n\nInput: {input_text}\n\nOutput: "
+        
+        # Tokenize prompt
+        prompt_tokenized = self.tokenizer(
+            prompt, 
+            max_length=self.max_length // 2,  # Reserve half length for output
+            truncation=True,
+            padding="max_length",
+            return_tensors="pt"
+        )
+        
+        # Tokenize output (labels)
+        output_tokenized = self.tokenizer(
+            output,
+            max_length=self.max_length // 2,
+            truncation=True,
+            padding="max_length",
+            return_tensors="pt"
+        )
+        
+        # Combine input_ids: prompt followed by output
+        input_ids = torch.cat([
+            prompt_tokenized['input_ids'].squeeze(),
+            output_tokenized['input_ids'].squeeze()
+        ])[:self.max_length]
+        
+        # Create attention mask (1 for prompt and output tokens, 0 for padding)
+        attention_mask = torch.cat([
+            prompt_tokenized['attention_mask'].squeeze(),
+            output_tokenized['attention_mask'].squeeze()
+        ])[:self.max_length]
+        
+        # Create labels tensor: -100 for prompt tokens (ignored in loss), actual ids for output
+        labels = torch.cat([
+            torch.full_like(prompt_tokenized['input_ids'].squeeze(), -100),
+            output_tokenized['input_ids'].squeeze()
+        ])[:self.max_length]
+        
+        return {
+            'input_ids': input_ids,
+            'attention_mask': attention_mask,
+            'labels': labels
+        }
+
+def create_dataloaders(
+    train_path: str,
+    val_path: str,
+    tokenizer: PreTrainedTokenizer,
+    batch_size: int = 4,
+    max_length: int = 512
+) -> Tuple[DataLoader, DataLoader]:
+    """
+    Create train and validation DataLoaders.
+    
+    Args:
+        train_path: Path to training data JSON file.
+        val_path: Path to validation data JSON file.
+        tokenizer: HuggingFace tokenizer.
+        batch_size: Batch size for training.
+        max_length: Maximum sequence length.
+        
+    Returns:
+        Tuple of (train_dataloader, val_dataloader)
+    """
+    # Create datasets
+    train_dataset = BibleInstructionDataset(train_path, tokenizer, max_length)
+    val_dataset = BibleInstructionDataset(val_path, tokenizer, max_length)
+    
+    # Create data loaders
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True
+    )
+    
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=batch_size,
+        shuffle=False
+    )
+    
+    return train_loader, val_loader
+
+class BiblicalDataset(Dataset):
+    """Custom Dataset for biblical data."""
+    
+    def __init__(self, input_ids: torch.Tensor, labels: torch.Tensor, attention_mask: torch.Tensor):
+        """
+        Initialize the dataset with input_ids, labels, and attention_mask.
+        
+        Args:
+            input_ids: Tensor of input token IDs.
+            labels: Tensor of label token IDs.
+            attention_mask: Tensor of attention masks.
+        """
+        self.input_ids = input_ids
+        self.labels = labels
+        self.attention_mask = attention_mask
+    
+    def __len__(self) -> int:
+        return len(self.input_ids)
+    
+    def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
+        return {
+            'input_ids': self.input_ids[idx],
+            'labels': self.labels[idx],
+            'attention_mask': self.attention_mask[idx]
+        }
+
+def load_datasets(data_path: str) -> Tuple[BiblicalDataset, BiblicalDataset]:
+    """
+    Load processed datasets and return as BiblicalDataset instances.
+    
+    Args:
+        data_path: Path to the directory containing processed data files.
+        
+    Returns:
+        Tuple (train_dataset, val_dataset) as BiblicalDataset instances.
+    """
+    data_dir = os.path.abspath(data_path)
+    train_file = os.path.join(data_dir, 'train.pt')
+    val_file = os.path.join(data_dir, 'val.pt')
+
+    if not os.path.exists(train_file) or not os.path.exists(val_file):
+        raise FileNotFoundError(f"Processed data files not found in {data_dir}")
+
+    train_data = torch.load(train_file)
+    val_data = torch.load(val_file)
+
+    train_dataset = BiblicalDataset(
+        input_ids=train_data['input_ids'],
+        labels=train_data['labels'],
+        attention_mask=train_data['attention_mask']
+    )
+    val_dataset = BiblicalDataset(
+        input_ids=val_data['input_ids'],
+        labels=val_data['labels'],
+        attention_mask=val_data['attention_mask']
+    )
+
+    return train_dataset, val_dataset
+
+# ===================== End of Added Code =====================
+
 # Example usage
 if __name__ == '__main__':
     preprocessor = BiblicalTextPreprocessor('config/data_config.json')
     
     # Process Bibles
     bibles = {}
-    for bible_file in os.listdir(os.path.join(preprocessor.raw_dir, 'bibles')):
+    bibles_dir = os.path.join(preprocessor.raw_dir, 'bibles')
+    for bible_file in os.listdir(bibles_dir):
         if bible_file.endswith(('.xml', '.json', '.txt')):
             translation = os.path.splitext(bible_file)[0].upper()
-            file_path = os.path.join(preprocessor.raw_dir, 'bibles', bible_file)
+            file_path = os.path.join(bibles_dir, bible_file)
             bible_data = preprocessor.process_bible_file(file_path, translation)
             bibles[translation] = bible_data
             preprocessor.save_processed_bible(bible_data, translation)
     
     # Process commentaries
     commentaries = {}
-    for commentary_file in os.listdir(os.path.join(preprocessor.raw_dir, 'commentaries')):
+    commentaries_dir = os.path.join(preprocessor.raw_dir, 'commentaries')
+    for commentary_file in os.listdir(commentaries_dir):
         if commentary_file.endswith(('.xml', '.json', '.txt', '.csv')):
             source = os.path.splitext(commentary_file)[0]
-            file_path = os.path.join(preprocessor.raw_dir, 'commentaries', commentary_file)
+            file_path = os.path.join(commentaries_dir, commentary_file)
             entries = preprocessor.process_commentary_file(file_path, source)
             commentaries[source] = entries
             preprocessor.save_processed_commentaries(entries, source)
