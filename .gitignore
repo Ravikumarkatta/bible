@@ -9,3 +9,7 @@ venv/
 data/raw/
 data/processed/
 models/
+build/
+dist/
+*.egg-info/
+logs/

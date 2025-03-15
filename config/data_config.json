@@ -97,5 +97,9 @@
       "entity": "theological-ai-lab",
       "tags": ["transformer", "bible", "theology"]
     }
-  }
+  },
+  "raw_data_path": "data/raw",
+  "processed_data_path": "data/processed",
+  "embeddings_path": "data/embeddings",
+  "valid_translations": ["kjv", "asv", "web"]
 }

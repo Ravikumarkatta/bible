@@ -3,7 +3,7 @@ bible-ai/
 │   ├── model_config.json    # Model architecture configuration
 │   ├── training_config.json # Training hyperparameters
 │   ├── data_config.json     # Data processing configuration
-│   └── frontend_config.json # Frontend configuration
+│   └── 1frontend_config.json # Frontend configuration
 │
 ├── data/                    # Data storage
 │   ├── raw/                 # Raw Bible texts, commentaries
@@ -82,9 +82,9 @@ bible-ai/
 │   └── .env                 # Frontend environment variables
 │
 ├── scripts/                 # Utility scripts
-│   ├── download_bibles.py   # Script to download Bible translations
-│   ├── generate_dataset.py  # Generate training datasets
-│   └── evaluate_model.py    # Run evaluation suite
+│   ├── 2download_bibles.py   # Script to download Bible translations
+│   ├── 3generate_dataset.py  # Generate training datasets
+│   └── 4evaluate_model.py    # Run evaluation suite
 │
 ├── tests/                   # Backend test suite
 │   ├── init.py
